@@ -2,22 +2,31 @@
 
 namespace SimpleSiteCrawler.Cli
 {
-    // ReSharper disable once ArrangeTypeModifiers
-    class Program
+  // ReSharper disable once ArrangeTypeModifiers
+  class Program
+  {
+    private static readonly Lazy<ILogger> LoggerLazy = new Lazy<ILogger>(LoggerFactory.CreateLogger());
+
+    private static ILogger Logger => LoggerLazy.Value;
+
+    // ReSharper disable once ArrangeTypeMemberModifiers
+    static void Main(string[] arguments)
     {
-        private static readonly Lazy<ILogger> LoggerLazy = new Lazy<ILogger>(LoggerFactory.CreateLogger());
-
-        private static ILogger Logger => LoggerLazy.Value;
-
-        // ReSharper disable once ArrangeTypeMemberModifiers
-        static void Main(string[] args)
+      if (arguments.Length == 0)
+      {
+        arguments = new string[]
         {
-            OptionsProvider.Parse(args,
-                DownloadConductor.Start,
-                Logger.Error,
-                Logger.Error);
+          "https://www.dictionnaire-academie.fr/"
+        };
+      }
 
-            Console.ReadLine();
-        }
+      OptionsProvider.Parse(arguments,
+          DownloadConductor.Start,
+          Logger.Error,
+          Logger.Error);
+
+      Console.WriteLine("Press any key to exit:");
+      Console.ReadLine();
     }
+  }
 }
