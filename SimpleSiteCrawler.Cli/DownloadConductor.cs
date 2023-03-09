@@ -1,29 +1,31 @@
-﻿using System;
-using SimpleSiteCrawler.Lib;
+﻿using SimpleSiteCrawler.Lib;
+using System;
 
 namespace SimpleSiteCrawler.Cli
 {
-    internal static class DownloadConductor
+  internal static class DownloadConductor
+  {
+    private static readonly Lazy<ILogger> LoggerLazy = new Lazy<ILogger>(LoggerFactory.CreateLogger);
+
+    private static ILogger Logger => LoggerLazy.Value;
+
+    public static void Start(Options options)
     {
-        private static readonly Lazy<ILogger> LoggerLazy = new Lazy<ILogger>(LoggerFactory.CreateLogger);
+      var startPage = new SitePage { Uri = new Uri(options.Site) };
+      var crawler = Crawler.CreateDefault(startPage.Uri);
 
-        private static ILogger Logger => LoggerLazy.Value;
+      crawler.OnDownloadCompleted += (s, e) => Logger.Info("Download completed!");
+      crawler.OnPageDownloadBegin += (s, p) => Logger.Info($"{p.Uri} download start");
+      crawler.OnPageDownloadComplete += (s, p) => Logger.Info($"[OK] {p.Uri.AbsolutePath}");
+      crawler.OnPageDownloadComplete += (s, p) => SaveHelper.SaveResult(options, p);
+      crawler.OnError += (s, exc) => Logger.Error(exc);
 
-        public static void Start(Options options)
-        {
-            var startPage = new SitePage {Uri = new Uri(options.Site)};
-            var crawler = Crawler.CreateDefault(startPage.Uri);
+      var task = crawler.CrawlAsync(startPage);
 
-            crawler.OnDownloadCompleted += (s, e) => Logger.Info("Download completed!");
-            crawler.OnPageDownloadBegin += (s, p) => Logger.Info($"{p.Uri} download start");
-            crawler.OnPageDownloadComplete += (s, p) => Logger.Info($"[OK] {p.Uri.AbsolutePath}");
-            crawler.OnPageDownloadComplete += (s, p) => SaveHelper.SaveResult(options, p);
-            crawler.OnError += (s, exc) => Logger.Error(exc);
-
-            var task = crawler.CrawlAsync(startPage);
-
-            if (!task.IsCompleted)
-                task.Start();
-        }
+      if (!task.IsCompleted)
+      {
+        task.Start();
+      }
     }
+  }
 }
