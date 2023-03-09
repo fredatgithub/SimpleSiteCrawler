@@ -1,6 +1,6 @@
 .NET Core Generic Site crawler for education (especially for myself) purposes.
 
-Written in Rider, on Linux.
+Written with Rider, on Linux.
 
 Need to be refactored, for example, implement reactive model. An Observer/publisher pattern implementation may be worth it and code will be more clean.
 
